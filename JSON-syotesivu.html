@@ -1,0 +1,117 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+<title>JSON syote</title>
+<link rel="stylesheet" href="jsontyylit.css">
+</head>
+<body>
+<div id="syotteet">
+<h2>Syöta tiedot mitä haluat tallentaa JSON:niin ja klikkaa tallenna</h2>
+<label>Nimi:</label><input id="nimi" type="text" placeholder="Liikkeen nimi"><br>
+<label>Osoite:</label><input id="osoite" type="text" placeholder="Katuosoite ja postinumero"><br>
+<label>Puh.nro:</label><input id="pnro" type="text" placeholder="Liikeen puhelinnro"><br>
+<label>Aukeaa:</label><input id="aukiolo" type="text" placeholder="hh:mm"><br>
+<label>Sulkeutuu</label><input id="sulkeutuu" type="text" placeholder="hh:mm"><br>
+<label>Tyyppi:</label><input id="tyyppi" type="text" placeholder="Liikkeen toimiala"><br>
+<label>Kuvaus:</label><input id="kuvaus" type="text" placeholder="Vapaa kuvaus"><br>
+<label>Valinnant:</label><input type="button" id="lisaa" value="lisää" onclick="lisaa()">
+<input type="button" id="undo" value="undo" onclick="undo()">
+<input type="button" id="tallenna" value="tallenna" onclick="tallennaJSON()"><br><br>
+<p> Tämä sivu kuvastaa palvelin puolen toimintoa, millä voidaan tallentaa liikkeitä näytettäväksi oikeassa formaatissa. <br><br>
+<b>Käyttöohje</b> <br><br>
+1) Syötä liikkeen tiedot sivulle, ja klikkaa "lisää"-painiketta. <br>
+2) Jos teit virheen voit poistaa edellisen lisäyksen "undo"-painikkeella <br>
+3) Toista kohtaa 1 niin kauan, että olet valmis.<br>
+4) Kopioi tekstikenttä klikkaamalla "tallenna"- painiketta ja tallenna se nimellä "liikkeet.json". <br>
+5) Jos haluat jatkaa JSON:ia voit liittää sen alla olevaan kenttään ja painaa "load JSON"-painiketta.<br><br>
+<label>ladattava JSON:</label><input id="loadJSON" type="text"><br><br>
+<input type="button" id="loadJSONbtn" value="loadJSON" onclick="lataaJSON()">
+</p><br>
+    <a href="main.html">Takaisin karttaan</a>
+</div>
+<div id="tuloste">
+<p id="preview">
+</p>
+</div>
+<div id="piilotettu"></div>
+<script>
+    let lastJSON = new Array;
+    let i = 0;
+    let myJSON = new String;
+    let nayteJSON;
+    
+    function lisaa(){
+        let nimi = document.getElementById("nimi").value;
+        let osoite = document.getElementById("osoite").value;
+        let pnro = document.getElementById("pnro").value;
+        let aukiolo = document.getElementById("aukiolo").value;
+        let sulkeutuu = document.getElementById("sulkeutuu").value;
+        let tyyppi = document.getElementById("tyyppi").value;
+        let kuvaus = document.getElementById("kuvaus").value;
+        
+        //lisää syötetyt tiedot oikeassa formaatissa myJSON-muuttujaan, sekä lastJSON tauluun.
+        myJSON += '{"nimi":"' + nimi + '",' + '"osoite":"' + osoite + '",' + '"pnro":"' + pnro + '",' + '"aukeaa":"' + aukiolo + '",' + '"sulkeutuu":"' + sulkeutuu + '",' + '"tyyppi":"' + tyyppi + '",' + '"kuvaus":"' + kuvaus + '"},'
+        lastJSON[i] = '{"nimi":"' + nimi + '",' + '"osoite":"' + osoite + '",' + '"pnro":"' + pnro + '",' + '"aukeaa":"' + aukiolo + '",' + '"sulkeutuu":"' + sulkeutuu + '",' + '"tyyppi":"' + tyyppi + '",' + '"kuvaus":"' + kuvaus + '"},'
+        
+        //lisätyn JSONin viimeinen pilkku otetaan näytettävästä pois, koska JSONin viimeinen elementti ei sisällä viimeistä pilkkua
+        nayteJSON = myJSON.slice(0, -1);
+        
+        //esitetään JSON oikeassa formaatissa
+        document.getElementById("preview").textContent ='{"liikkeet":[' + nayteJSON.toString()+ "]}";
+        document.getElementById("nimi").focus;
+        
+        //kasvatetaan lastJSON taulun indeksiä
+        i++;
+        
+    }
+    
+    function undo(){
+        //laskee viimeisimmän lisäyksen pituuden ja poistaa sen JSON:sta
+        //tämän jälkeen päivittää esikatselu-näkymän
+        try{
+        var pituus = lastJSON[i-1].length;
+        myJSON = myJSON.slice(0, -pituus);
+        nayteJSON = myJSON.slice(0, -1);
+        document.getElementById("preview").textContent ='{"liikkeet":[' + nayteJSON.toString()+ "]}";
+        i--;
+        }
+        catch(error){
+        window.alert("Undo failed!");
+        console.log("length of string to remove was:" + lastJSON[i+1]);
+        }
+    }
+    
+    function tallennaJSON(){
+        //luo elementin mihin sijoittaa JSON formaatissa olevan tekstin ja kopio leikepöydälle
+        //sen jälkeen tuhoaa luodun elementin
+        //tämä sen takia, ettei <p>:stä tai muista ei-muokattavista elementeistä voi kopioida suoraan
+        try{
+        let kopioteksti = '{"liikkeet":[' + nayteJSON.toString()+ "]}";
+        let piilo = document.createElement("input");
+        document.getElementById("piilotettu").appendChild(piilo);
+        piilo.setAttribute("id", "kopio");
+        document.getElementById("kopio").value = kopioteksti;
+        piilo.select();
+        document.execCommand('copy');
+        document.getElementById("piilotettu").removeChild(piilo);
+        }
+        catch(error){
+        window.alert("Copy failed!");
+    }   
+    }
+    
+    function lataaJSON(){
+        //asettaa muuttujat ladatusta JSON:sta oikeaan muotoon
+        myJSON = document.getElementById("loadJSON").value;
+        myJSON = myJSON.slice(0, -2) + ",";
+        myJSON = myJSON.slice(13);
+        nayteJSON = myJSON.slice(0, -1);
+        document.getElementById("preview").textContent ='{"liikkeet":[' + nayteJSON.toString()+ "]}";
+        
+        //lisää "ladatun" JSON:n lastJSON tauluun
+        lastJSON[i] = myJSON;
+        i++;
+    }
+</script>
+</body>
+</html>

@@ -1,0 +1,75 @@
+#mapid { 
+    height: 800px; 
+    width: 60%;
+    margin: 0 3% 0 15%;
+    border: black solid;
+    float: left;
+} 
+
+.custom-popup .leaflet-popup-content-wrapper {
+  background:#ffc;
+  font-size:12px;
+  line-height:18px;
+  position: relative;
+  top: -30px;
+  
+  }
+.custom-popup .leaflet-popup-content-wrapper a {
+  color:rgba(0,0,255,0.5);
+  }
+.custom-popup .leaflet-popup-tip-container {
+  width:30px;
+  height:15px;
+  }
+.custom-popup .leaflet-popup-tip {
+  border-left:15px solid transparent;
+  border-right:15px solid transparent;
+  border-top:15px solid #2c3e50;
+  }
+#content{
+    align-content: center;  
+}
+h3 {
+    text-align: center;
+    font-size: 1.7em;
+    letter-spacing: 0.2em;
+}
+body {
+    background-image: url(road-map-rug.jpg);
+    background-size: cover;
+    font-weight: bold;
+    margin: 0;
+}
+#info, #info2 {
+    background-color: rgb(184, 121, 184, 0.9);
+    display: inline-block;
+    position: relative;
+    padding: 10px;
+    border: solid black;
+    border-radius: 10%;
+    float: left;
+    width: 100%;
+}
+#info {
+    margin-bottom: 25px;
+    margin-top: 20px;
+}
+h4 {
+    text-align: center;
+    font-size: 1.2em;
+    letter-spacing: 0.1em;
+}
+#footer, #header {
+     background-color: rgb(184, 121, 184, 0.9);
+   float: left;
+    width: 100%;
+    text-align: center;
+    margin: 5px;
+    margin-left: auto;
+    margin-right: auto;
+}
+#infot {
+    float: left;
+    width: 220px;
+}
+

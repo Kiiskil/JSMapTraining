@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html>
+
+   <head>
+      <title>Liikkeiden aukioloajat</title>
+      <meta charset="UTF-8">
+
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.3.3/dist/leaflet.css"
+   integrity="sha512-Rksm5RenBEKSKFjgI3a41vrjkw4EVPlJ3+OiI65vTjIdo9brlAacEuKOiQ5OFh7cOI1bkDwLqdLw3Zg0cRJAAQ=="
+   crossorigin=""/>
+       <!--tämän pitää tulla leafletin CSS:n jälkeen-->
+ <script src="https://unpkg.com/leaflet@1.3.3/dist/leaflet.js"
+   integrity="sha512-tAGcCfR4Sc5ZP5ZoVz0quoZDYX5aCtEm/eu1KhSLj2c9eFrylXZknQYmxUssFaVJKvvc0dJQixhGjG2yXWiV9Q=="
+   crossorigin=""></script>
+<link rel="stylesheet" type="text/css" href="/iirola/java-harkka/liikesivu.css"/>
+   </head>
+   <body>
+       <div id="content">
+           <div id="header">
+      <h3>Liikkeiden aukioloajat</h3>
+           </div>
+<div class='custom-popup' id="mapid"></div>
+           <div id="infot">
+<div id="info"><h4>Info</h4>
+    Viemällä kursorin merkin päälle<br> saat liikkeestä lisätietoja.<br><br>
+    <img src="/iirola/java-harkka/green-dot.png">Liike on auki yli kaksi tuntia.<br>
+    <img src="/iirola/java-harkka/blue-dot.png">Liike on auki alle kaksi tuntia.<br>
+    <img src="/iirola/java-harkka/yellow-dot.png">Liike on auki alle tunnin.<br>
+    <img src="/iirola/java-harkka/red-dot.png">Liike on kiinni.<br><br>
+    Näytettävien liikkeiden tyyppi:
+    <form action="">
+        <input type="radio" onClick="check()" id="grilli" name="tyyppi" value="Grilli">Grilli<br>
+        <input type="radio" onClick="check()" id="teollisuus" name="tyyppi" value="Teollisuus">Teollisuus<br>
+        <input type="radio" onClick="check()" id="kaikki" name="tyyppi" value="kaikki" checked="checked">Kaikki<br>
+    </form>
+</div>
+<div id="info2"><h4>Kartta</h4>
+    <p>Karttapohja on Leafletin<br> kirjastoa käyttäen luotu: <br><a href="https://leafletjs.com/">Leafletin kotisivut</a>
+    </p><p>
+    JSON-tiedoston muokkausta varten on oma saitti:<br>
+    <a href="JSON-syotesivu.html">Muokkaussivu</a>
+    </p>
+    
+</div>
+               </div>
+       </div>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>
+
+<script>
+    //haetaan kuvatasot ja lisätään karttaan
+var mymap = L.map('mapid').setView([63.7,26,6],6);
+    L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token=pk.eyJ1IjoibDgzMTciLCJhIjoiY2prMjh6Yjl5MDlqaTNrbzYxbjZrZ3IzaSJ9.tzjAddzJpUH58xHVrxS-Mw', {
+        attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors, <a href="https://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
+        maxZoom: 18,
+        id: 'mapbox.streets'
+    }).addTo(mymap);
+//Muodostetaan eri väriset ikonit
+    var yellowIcon = L.icon({
+        iconUrl: 'yellow-dot.png', 
+                                   
+        iconSize:     [28,28], 
+        iconAnchor:   [16, 32], 
+        popupAnchor:  [-32, -32] 
+    });
+
+    var blueIcon = L.icon({
+        iconUrl: 'blue-dot.png', 
+                                   
+        iconSize:     [28,28], 
+        iconAnchor:   [16, 32], 
+        popupAnchor:  [-32, -32] 
+    });
+        var greenIcon = L.icon({
+        iconUrl: 'green-dot.png', 
+                                  
+        iconSize:     [28,28],
+        iconAnchor:   [16, 32], 
+        popupAnchor:  [-32, -32]
+    });
+
+        var redIcon = L.icon({
+        iconUrl: 'red-dot.png', 
+                                   
+        iconSize:     [28,28], 
+        iconAnchor:   [16, 32],
+        popupAnchor:  [-32, -32]
+    });
+    //ikonien filtteröintiä varten ryhmät.
+    var Betoniteollisuus = new L.layerGroup();
+    var Grillikioskit = new L.layerGroup();
+    var Loput = new L.layerGroup();
+
+    $.ajax({
+               url: '/liikkeet.json' //JSON-tiedoston oltava samassa juuressa pääohjelman kanssa
+        }).fail(function() {
+                console.log("fail!");
+        }).done(function(data) {
+            // käydään jokainen JSON-tiedoston kohta läpi
+            $.each(data.liikkeet, function(index, liike) {
+               //https://stackoverflow.com/questions/15919227/get-latitude-longitude-as-per-address-given-for-leaflet
+                //seuraava on funktio joka muuttaa etsityn osoitteen lat- ja lon-arvoiksi.
+               $.get(location.protocol + '//nominatim.openstreetmap.org/search?format=json&q='+liike.osoite, function(osoite){
+                   var lat1 = osoite["0"].lat;
+                   var lon1 = osoite["0"].lon;//pituus-ja leveyskoordinaatit merkille
+                 
+                 //seuraava koodiblokki on kelloanajan käsittelyä
+                   var kusetus=0;//kellon testailua varten, tällä saa muutettua kellonaikaa
+                   date1=new Date();
+                     var ctunnit=date1.getHours()+kusetus;
+                     var cminut= date1.getMinutes();
+                     var current_time = ctunnit*60 + cminut;//nykyinen kellonaika minuutteina
+                     console.log("Aika minuutteina:"+current_time+" Kello on: "+ctunnit+":"+cminut);
+                     var stunnit=60*(parseInt(liike.sulkeutuu.slice(0,2)));
+                     var sminut=parseInt(liike.sulkeutuu.slice(3,5));
+                     var sulk = stunnit + sminut;//liikkeen sulkeutumisaika minuutteina
+                     var atunnit=60*(parseInt(liike.aukeaa.slice(0,2)));
+                     var aminut=parseInt(liike.aukeaa.slice(3,5));//JSONista kellonaika muokattuna
+                     var auk=atunnit+aminut;//liikkeen aukeamisaika minuutteina;
+                 //seuraavalla if-viidakolla etsitään oikean värinen ikoni kellonajan perusteella
+                   if(current_time>auk)
+                       {
+                        if(sulk-auk<=0)
+                            {
+                                sulk=auk+(24*60-auk+sulk);
+                            }
+                        if(sulk -current_time<0) 
+                            {
+                                var merkki = L.marker([lat1, lon1], {icon: blueIcon});
+                            }
+                        else if(sulk -current_time<60) 
+                            {
+                                var merkki = L.marker([lat1, lon1], {icon: yellowIcon});
+                            }
+                        else if(sulk -current_time<120)
+                            {
+                                var merkki = L.marker([lat1, lon1], {icon: blueIcon});
+                            }
+                        else
+                            {
+                                var merkki = L.marker([lat1, lon1], {icon: greenIcon});
+                            }
+                        }
+                   else
+                   {
+                       var merkki = L.marker([lat1, lon1], {icon: redIcon}).addTo(mymap);
+                   }
+                   //seuraava if-blokki määrittelee ikonin ryhmän radiovalitsimen filtteriä varten
+                     if(liike.tyyppi=="Betoniteollisuus")
+                    {
+                        merkki.addTo(Betoniteollisuus);
+                    }
+                    else if(liike.tyyppi=="Grillikioski")
+                    {
+                        merkki.addTo(Grillikioskit);
+                    }
+                   else{merkki.addTo(Loput);}
+                   
+                   //Mitä ikonia klikatessa näkyy
+                merkki.bindPopup("<b>" + liike.nimi + "</b>"+"<br><br>"+liike.aukeaa+"-"+liike.sulkeutuu+"<br><br>"+liike.osoite+"<br><br>"+liike.pnro+"<br><br>"+liike.kuvaus+"<br><br>");
+                    });
+              });
+        //Lisätään ikoniryhmät karttapohjalle
+        mymap.addLayer(Grillikioskit);
+        mymap.addLayer(Betoniteollisuus);
+        mymap.addLayer(Loput);
+        });
+    // ajax done
+    //Radiovalitsimen mukaiset filtterit ikoneille.
+  function check(){
+        if(document.getElementById("grilli").checked)
+            {
+                mymap.removeLayer(Betoniteollisuus);
+                mymap.removeLayer(Loput);
+                mymap.addLayer(Grillikioskit);
+            }
+        else if(document.getElementById("teollisuus").checked)
+            {
+                mymap.removeLayer(Grillikioskit);
+                mymap.removeLayer(Loput);
+                mymap.addLayer(Betoniteollisuus);
+            }
+        else
+            {
+                mymap.addLayer(Grillikioskit);
+                mymap.addLayer(Betoniteollisuus);
+                mymap.addLayer(Loput);
+            }
+        }
+
+</script>
+
+<div id="footer">
+<p>Copyright Iiro &amp; Joonas 2018, web-ohjelmoinnin perusteiden harjoitustyö</p>
+</div>
+   </body>
+
+</html>

@@ -1,0 +1,58 @@
+Joonas Varis [9:49 AM]
+<html>
+   <head>
+       <title>Jälleenmyyjäkartta JSON:sta</title>
+   </head>
+<body>
+   <h2>Jälleenmyyjäkartta JSON:sta</h2>
+   <h2>Tekijät: Iiro Laukkanen & Joonas Varis</h2>
+   <h2>Palautus pvm: 20.9.2018</h2>
+   <h2>TTMS0500 - summer</h2>
+   <br>
+   <b>Ohjelman kuvaus:</b><br>
+   Karttapalvelu, millä valmistaja voi esittää kaikki jälleenmyyjänsä.<br>
+   Käyttäjää varten rakennetaan syötesivu, missä käyttäjä voi luoda oikeassa formaatissa dataa (JSON).<br>
+   Sivu kuvastaa toimintoa, jossa asiakkaan JSON tallennettaisiin palvelimella karttapalvelua varten.<br> Tämä ei ole mahdollista pelkästään Javascriptillä. Mutta toiminnallisuus on mallinnettu siten, <br> että JSON tulostuu sivun elementtiin mistä käyttäjä voi kopioida teksin napin painalluksella ja tallentaa .JSON muodossa koneelleen.
+   <br>
+   <b>Speksaus:</b><br>
+   1)Karttaohjelma <br>
+   -Rakennetaan karttaohjelma, mikä käyttää leaflet kirjastoa<br>
+   -Ohjelma lukee JSON filestä tietoa, ja tekee niistä nodeja kartalle, nodeja klikkaamalla saa niistä lisätietoa<br>
+   -Nodet poikkeavat väriltään sen mukaan kuinka kauan niillä on aukioloaikaa jäljellä.<br>
+   -Ohjelmalle ei anneta koordinaatteja, vaan se etsii osoitetiedon perusteella noden paikan<br>
+   <br>
+   2)Syötesivu <br>
+   -Nettisivu, jolla asiakas voi tuottaa oikeamuotoista JSON dataa sivun 1 luettavaksi<br>
+   -Sivulla on mahdollista lisätä liike JSON:iin (näkyy sivulla)<br>
+   -Poistaa viime syöte, jos tuli virhe<br>
+   -"Tallentaa" annetut tiedot<br><br>
+    
+    <b>Tärkemmät toiminnot ja funktiot</b><br><br>
+    Leaflet
+    <ul>
+        <li>Tässä käytetään erillistä ulkoista kirjastoa, josta haetaan sekä karttapohjat, osoitetiedot että CSS-määritykset kartalle</li>
+        <li>Haetaan liikkeen osoitteelle koordinaatit</li>
+    </ul>
+    JavaScript
+    <ul>
+        <li>Muodostetaan kartta</li>
+        <li>Muodostetaan ikonit</li>
+        <li>Muodostetaan karttatasoryhmät</li>
+        <li>Funktio, joka tarkistaa radiovalitsimen asennon ja näyttää eri karttatason sen perusteella</li>
+    </ul>
+    AJAX
+    <ul>
+        <li>Haetaan JSON-tiedostosta liikkeiden tiedot, ja jokaiselle liikkeelle tehdään loopilla seuraavat toiminnot</li>
+        <ul>
+            <li>Funkiot, joilla haetaan järjestelmän kellonaika ja muutetaan se minuuteiksi</li>
+            <li>Funktiot, joilla haetaan liikkeiden tiedoista aukioloajat ja muutetaan ne minuuteiksi</li>
+            <li>IF-lausekkeet, joilla tarkistetaan onko liike auki ja jos on, kauan, sekä määrätään ikonien värit</li>
+            <li>Lisätään liike karttatasolle liikkeen tyypin perusteella</li>
+        </ul>
+    </ul>
+    <b>Ajankäyttö ja vastuunjako</b><br><br>
+    Iiro oli vastuussa karttasivun tekemisestä ja Joonas JSON-tiedoston muokkaussivusta.<br>
+    Työtä tehtiin aina samana aikaan ja molemmat käyttivät työhön noin 25 tuntia.
+
+</body>
+</html>

@@ -1,0 +1,29 @@
+label{
+    display: inline-block;
+    float: left;
+    clear: left;
+    width: 150px;
+    text-align: right;
+}
+input {
+    display: inline-block;
+    float: left;
+}
+
+#tuloste{
+    float: left;
+    width: 700px;
+    height: 700px;
+    margin-left: 20px;
+}
+
+#syotteet{
+    margin-left: 20px;
+    width: 500px;
+    float: left;
+}
+
+#loadJSONbtn{
+    margin-left: 150px;
+    width: 175px;
+}
